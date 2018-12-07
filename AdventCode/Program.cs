@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdventCode.Logic;
+using System;
 
 namespace AdventCode
 {
@@ -6,7 +7,7 @@ namespace AdventCode
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Advent.Go_18_06();
 
             Console.WriteLine("\n\nPress any key to exit...");
             Console.ReadKey();

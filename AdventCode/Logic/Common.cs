@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AdventCode
+namespace AdventCode.Logic
 {
     public static class Common
     {
