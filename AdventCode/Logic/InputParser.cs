@@ -6,9 +6,9 @@ namespace AdventCode.Logic
 {
     public static class InputParser
     {
-        public static List<string> GetLines(int p_iYear, int p_iDay)
+        public static List<string> GetLines(string p_sYear, string p_sDay)
         {
-            return File.ReadAllLines(@"Input\" + p_iYear.ToString("D2") + @"\" + p_iDay.ToString("D2") + ".txt").ToList();
+            return File.ReadAllLines(@"Input\" + p_sYear + @"\" + p_sDay + ".txt").ToList();
         }
     }
 }

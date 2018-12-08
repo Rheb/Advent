@@ -5,15 +5,110 @@ using System.Text;
 
 namespace AdventCode.Logic
 {
-    public static class Advent
+    public static class Advent2018
     {
-        #region 2018-12-06
+        #region Go_01
 
-        public static void Go_18_06()
+        public static void Go_01()
         {
-            var input = InputParser.GetLines(18, 6);
+            var input = InputParser.GetLines("18", "01");
 
-            var coords = new List<ICoord>();
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_02
+
+        public static void Go_02()
+        {
+            var input = InputParser.GetLines("18", "02");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_03
+
+        public static void Go_03()
+        {
+            var input = InputParser.GetLines("18", "03");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_04
+
+        public static void Go_04()
+        {
+            var input = InputParser.GetLines("18", "04");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_05
+
+        public static void Go_05()
+        {
+            var input = InputParser.GetLines("18", "05");
+
+            List<char> chars = input[0].ToCharArray().ToList();
+
+            int React()
+            {
+                int count = 0;
+
+                for (int i = chars.Count - 1; i > 0; i--)
+                {
+                    if (
+                        chars[i] != chars[i-1]
+                     && char.ToUpper(chars[i]) == char.ToUpper(chars[i-1])
+                    )
+                    {
+                        count++;
+                        chars.RemoveAt(i);
+                        chars.RemoveAt(i-1);
+                        i--;
+                    }
+                }
+
+                return count;
+            }
+
+            int reactions = React();
+            while (reactions > 0)
+            {
+                reactions = React();
+            }
+
+            int shortest = int.MaxValue;
+            for (char c = 'A'; c <= 'Z'; c++)
+            {
+                chars = input[0].ToCharArray().Where(x => char.ToUpper(x) != c).ToList();
+                
+                while (React() > 0) { }
+
+                shortest = Math.Min(chars.Count, shortest);
+            }
+            
+            Console.WriteLine(chars.Count);
+            Console.WriteLine(shortest);
+        }
+
+        #endregion
+
+        #region Go_06
+
+        public static void Go_06()
+        {
+            var input = InputParser.GetLines("18", "06");
+
+            var coords = new List<IntCoord>();
 
             int xMax = 0;
             int yMax = 0;
@@ -27,13 +122,13 @@ namespace AdventCode.Logic
                 xMax = Math.Max(xMax, x);
                 yMax = Math.Max(yMax, y);
 
-                coords.Add(new ICoord(x, y));
+                coords.Add(new IntCoord(x, y));
             }
 
             int centerCount = 0;
             void CheckCoords(int x, int y)
             {
-                ICoord closest = null;
+                IntCoord closest = null;
                 int currentDist = int.MaxValue;
                 int dist = 0;
 
@@ -99,11 +194,12 @@ namespace AdventCode.Logic
 
         #endregion
 
-        #region 2018-12-07
+        #region Go_07
 
-        public static void Go_18_07()
+        public static void Go_07()
         {
-            var input = InputParser.GetLines(18, 7);
+            var input = InputParser.GetLines("18", "07");
+
             string order = "";
 
             Dictionary<char, OrderedStep> Steps = new Dictionary<char, OrderedStep>();
@@ -194,5 +290,260 @@ namespace AdventCode.Logic
         }
 
         #endregion
+
+        #region Go_08
+
+        public static void Go_08()
+        {
+            var input = InputParser.GetLines("18", "08");
+
+            int totalData = 0;
+            var numbers = input[0].Split(' ').Select(x => int.Parse(x)).ToList();
+            var index = 0;
+
+            void Read(MetadataTree tree)
+            {
+                int childsLeft = numbers[index];
+                index++;
+                int dataLeft = numbers[index];
+                index++;
+
+                while (childsLeft > 0)
+                {
+                    MetadataTree child = new MetadataTree();
+                    Read(child);
+                    tree.Children.Add(child);
+                    childsLeft--;
+                }
+                while (dataLeft > 0)
+                {
+                    tree.DataItems.Add(numbers[index]);
+                    totalData += numbers[index];
+
+                    index++;
+                    dataLeft--;
+                }
+            }
+
+            void Calc(MetadataTree tree)
+            {
+                if (tree.Children.Count == 0)
+                {
+                    tree.Val = tree.DataItems.Aggregate(0, (a, b) => a + b);
+                }
+                else
+                {
+                    foreach (var child in tree.Children)
+                    {
+                        Calc(child);
+                    }
+
+                    foreach (int i in tree.DataItems)
+                    {
+                        if (i <= tree.Children.Count)
+                        {
+                            tree.Val += tree.Children[i - 1].Val;
+                        }
+                    }
+                }
+            }
+
+            MetadataTree root = new MetadataTree();
+            Read(root);
+            Calc(root);
+
+            Console.WriteLine(totalData);
+            Console.WriteLine(root.Val);
+        }
+
+        #endregion
+
+        #region Go_09
+
+        public static void Go_09()
+        {
+            var input = InputParser.GetLines("18", "09");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_10
+
+        public static void Go_10()
+        {
+            var input = InputParser.GetLines("18", "10");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_11
+
+        public static void Go_11()
+        {
+            var input = InputParser.GetLines("18", "11");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_12
+
+        public static void Go_12()
+        {
+            var input = InputParser.GetLines("18", "12");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_13
+
+        public static void Go_13()
+        {
+            var input = InputParser.GetLines("18", "13");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_14
+
+        public static void Go_14()
+        {
+            var input = InputParser.GetLines("18", "14");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_15
+
+        public static void Go_15()
+        {
+            var input = InputParser.GetLines("18", "15");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_16
+
+        public static void Go_16()
+        {
+            var input = InputParser.GetLines("18", "16");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_17
+
+        public static void Go_17()
+        {
+            var input = InputParser.GetLines("18", "17");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_18
+
+        public static void Go_18()
+        {
+            var input = InputParser.GetLines("18", "18");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_19
+
+        public static void Go_19()
+        {
+            var input = InputParser.GetLines("18", "19");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_20
+
+        public static void Go_20()
+        {
+            var input = InputParser.GetLines("18", "20");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_21
+
+        public static void Go_21()
+        {
+            var input = InputParser.GetLines("18", "21");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_22
+
+        public static void Go_22()
+        {
+            var input = InputParser.GetLines("18", "22");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_23
+
+        public static void Go_23()
+        {
+            var input = InputParser.GetLines("18", "23");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_24
+
+        public static void Go_24()
+        {
+            var input = InputParser.GetLines("18", "24");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
+        #region Go_25
+
+        public static void Go_25()
+        {
+            var input = InputParser.GetLines("18", "25");
+
+            Console.WriteLine("");
+        }
+
+        #endregion
+
     }
 }
