@@ -4,6 +4,53 @@ using System.Text;
 
 namespace AdventCode.Logic
 {
+    #region FabricClaim
+
+    public class FabricClaim
+    {
+        public int id { get; set; } = 0;
+        public bool FoundOverlap { get; set; } = false;
+
+        public CoordI TopL { get; set; }
+        public CoordI BotR { get; set; }
+
+        public FabricClaim(int p_iID, CoordI p_cTopL, CoordI p_cBotR)
+        {
+            id = p_iID;
+            TopL = p_cTopL;
+            BotR = p_cBotR;
+        }
+    }
+
+    #endregion
+
+    #region SleepyGurad
+
+    public class SleepyGurad
+    {
+        public int id { get; set; } = 0;
+
+        public int TotalSleepTime { get; set; } = 0;
+
+        public List<DateTime> Start { get; set; } = new List<DateTime>();
+        public List<DateTime> Sleep { get; set; } = new List<DateTime>();
+        public List<DateTime> Wake { get; set; } = new List<DateTime>();
+
+        public Dictionary<int, int> SleepyMinutes { get; set; } = new Dictionary<int, int>();
+
+        public SleepyGurad(int p_iID)
+        {
+            id = p_iID;
+
+            for (int i = 0; i < 60; i++)
+            {
+                SleepyMinutes.Add(i, 0);
+            }
+        }
+    }
+
+    #endregion
+
     #region MetadataTree
 
     public class MetadataTree
@@ -37,20 +84,16 @@ namespace AdventCode.Logic
 
     #endregion
 
-    #region IntCoord
+    #region AreaBoundCoord
 
-    public class IntCoord
+    public class AreaBoundCoord : CoordI
     {
-        public int x { get; set; } = 0;
-        public int y { get; set; } = 0;
-
         public bool IsBounded { get; set; } = true;
         public int ClosestCount { get; set; } = 0;
 
-        public IntCoord(int p_iX, int p_iY)
+        public AreaBoundCoord(int p_iX, int p_iY)
+            : base(p_iX, p_iY)
         {
-            x = p_iX;
-            y = p_iY;
         }
     }
 

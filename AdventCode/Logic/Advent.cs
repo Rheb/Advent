@@ -35,7 +35,97 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "03");
 
-            Console.WriteLine("");
+            var claims = new Dictionary<int, FabricClaim>();
+            int id = 0;
+
+            int xMax = 0;
+            int yMax = 0;
+
+            foreach (var line in input)
+            {
+                int indexAt = line.IndexOf('@');
+                int indexComma = line.IndexOf(',');
+                int indexColon = line.IndexOf(':');
+                int indexX = line.IndexOf('x');
+
+                id = int.Parse(line.Substring(1, indexAt - 2));
+
+                int topX = int.Parse(line.Substring(indexAt + 2, indexComma - indexAt - 2));
+                int topY = int.Parse(line.Substring(indexComma + 1, indexColon - indexComma - 1));
+                int botX = topX + int.Parse(line.Substring(indexColon + 2, indexX - indexColon - 2)) - 1;
+                int botY = topY + int.Parse(line.Substring(indexX + 1)) - 1;
+
+                if (!claims.ContainsKey(id))
+                {
+                    claims.Add(id, new FabricClaim(
+                        id,
+                        new CoordI(topX, topY),
+                        new CoordI(botX, botY)
+                    ));
+
+                    xMax = Math.Max(xMax, botX);
+                    yMax = Math.Max(yMax, botY);
+                }
+            }
+
+            int overlapCount = 0;
+            var InsideCountByCords = new Dictionary<CoordI, int>();
+
+            for (int y = 0; y <= yMax; y++)
+            {
+                for (int x = 0; x <= xMax; x++)
+                {
+                    InsideCountByCords.Add(new CoordI(x, y), 0);
+                }
+            }
+
+            foreach (var claim in claims.Values)
+            {
+                CoordI it = new CoordI(claim.TopL.x, claim.TopL.y);
+
+                while (it.y <= claim.BotR.y)
+                {
+                    while (it.x <= claim.BotR.x)
+                    {
+                        InsideCountByCords[it]++;
+
+                        if (InsideCountByCords[it] == 2)
+                        {
+                            overlapCount++;
+                        }
+
+                        it.x++;
+                    }
+
+                    it.x = claim.TopL.x;
+                    it.y++;
+                }
+
+
+                foreach (var other in claims.Values)
+                {
+                    if (claim.id != other.id)
+                    {
+                        if (
+                            Common.AreaOverlap(
+                                claim.TopL, claim.BotR,
+                                other.TopL, other.BotR
+                            )
+                        )
+                        {
+                            claim.FoundOverlap = true;
+                            other.FoundOverlap = true;
+                        }
+                    }
+                }
+            }
+
+            var clean = claims.Where(claim => !claim.Value.FoundOverlap).Select(claim => claim.Key).ToList();
+
+            int cleanId = clean.Last();
+
+            Console.WriteLine(overlapCount);
+            Console.WriteLine(cleanId);
         }
 
         #endregion
@@ -46,7 +136,69 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "04");
 
-            Console.WriteLine("");
+            input.Sort();
+            var guards = new Dictionary<int, SleepyGurad>();
+            int id = 0;
+
+            foreach (var line in input)
+            {
+                int dtStart = line.IndexOf('[') + 1;
+                int dtLen = line.IndexOf(']') - dtStart;
+
+                int guardIndex = line.IndexOf('#');
+
+                DateTime timestamp = DateTime.Parse(line.Substring(dtStart, dtLen));
+
+                if (guardIndex > 0)
+                {
+                    guardIndex++;
+                    int guardLen = line.IndexOf(" begins") - guardIndex;
+
+                    id = int.Parse(line.Substring(guardIndex, guardLen));
+
+                    if (!guards.ContainsKey(id))
+                    {
+                        guards.Add(id, new SleepyGurad(id));
+                    }
+
+                    guards[id].Start.Add(timestamp);
+                }
+                else if (line.Contains("asleep"))
+                {
+                    guards[id].Sleep.Add(timestamp);
+                }
+                else
+                {
+                    DateTime fellAsleep = guards[id].Sleep.Last();
+                    for (int i = fellAsleep.Minute; i < timestamp.Minute; i++)
+                    {
+                        guards[id].SleepyMinutes[i]++;
+                    }
+
+                    guards[id].TotalSleepTime += (int)(timestamp - fellAsleep).TotalMinutes;
+                    guards[id].Wake.Add(timestamp);
+                }
+            }
+
+            SleepyGurad sleepy = guards.Values.Aggregate((a, b) => a.TotalSleepTime > b.TotalSleepTime ? a : b);
+
+            int minute = sleepy.SleepyMinutes.Aggregate((a, b) => a.Value > b.Value ? a : b).Key;
+
+            SleepyGurad topGuard = new SleepyGurad(-1);
+            int topMinute = 0;
+            foreach (var guard in guards.Values)
+            {
+                int top = guard.SleepyMinutes.Aggregate((a, b) => a.Value > b.Value ? a : b).Key;
+
+                if (guard.SleepyMinutes[top] > topGuard.SleepyMinutes[topMinute])
+                {
+                    topGuard = guard;
+                    topMinute = top;
+                }
+            }
+
+            Console.WriteLine(minute * sleepy.id);
+            Console.WriteLine(topMinute * topGuard.id);
         }
 
         #endregion
@@ -108,7 +260,7 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "06");
 
-            var coords = new List<IntCoord>();
+            var coords = new List<AreaBoundCoord>();
 
             int xMax = 0;
             int yMax = 0;
@@ -122,13 +274,13 @@ namespace AdventCode.Logic
                 xMax = Math.Max(xMax, x);
                 yMax = Math.Max(yMax, y);
 
-                coords.Add(new IntCoord(x, y));
+                coords.Add(new AreaBoundCoord(x, y));
             }
 
             int centerCount = 0;
             void CheckCoords(int x, int y)
             {
-                IntCoord closest = null;
+                AreaBoundCoord closest = null;
                 int currentDist = int.MaxValue;
                 int dist = 0;
 
