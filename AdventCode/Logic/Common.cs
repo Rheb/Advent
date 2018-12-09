@@ -8,28 +8,6 @@ namespace AdventCode.Logic
 
     public static class Common
     {
-        /// <summary>
-        /// Probably buggy: see 2018 Go_03: id 469 
-        /// </summary>
-        public static bool AreaOverlap(CoordI aTopL, CoordI aBotR, CoordI bTopL, CoordI bBotR)
-        {
-            if (
-                (
-                    (IntInBounds(aTopL.x, bTopL.x, bBotR.x) || IntInBounds(aBotR.x, bTopL.x, bBotR.x))
-                 && (IntInBounds(aTopL.y, bTopL.y, bBotR.y) || IntInBounds(aBotR.y, bTopL.y, bBotR.y))
-                )
-             || (
-                    (IntInBounds(bTopL.x, aTopL.x, aBotR.x) || IntInBounds(bBotR.x, aTopL.x, aBotR.x))
-                 && (IntInBounds(bTopL.y, aTopL.y, aBotR.y) || IntInBounds(bBotR.y, aTopL.y, aBotR.y))
-                )
-            )
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public static bool IntInBounds(int x, int min, int max)
         {
             if (x >= min && x <= max)
@@ -58,9 +36,9 @@ namespace AdventCode.Logic
 
         public static bool operator ==(CoordI a, CoordI b)
         {
-            if (ReferenceEquals(a, null))
+            if (a is null)
             {
-                return ReferenceEquals(b, null);
+                return b is null;
             }
 
             return a.Equals(b);

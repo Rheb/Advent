@@ -7,7 +7,7 @@ namespace AdventCode
     {
         static void Main(string[] args)
         {
-            Advent2018.Go_03();
+            Advent2018.Go_10();
 
             Console.WriteLine("\n\nPress any key to exit...");
             Console.ReadKey();

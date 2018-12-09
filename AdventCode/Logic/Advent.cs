@@ -13,7 +13,45 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "01");
 
-            Console.WriteLine("");
+            int freq = 0;
+            int? twice = null;
+            int? freqFirst = null;
+
+            List<int> tracked = new List<int>();
+
+            while (twice == null)
+            {
+                for (int i = 0; i < input.Count; i++)
+                {
+                    string line = input[i];
+
+                    int num = int.Parse(line.Substring(1));
+
+                    if (line.Contains('+'))
+                    {
+                        freq += num;
+                    }
+                    else
+                    {
+                        freq -= num;
+                    }
+
+                    if (tracked.Contains(freq) && twice == null)
+                    {
+                        twice = freq;
+                    }
+
+                    tracked.Add(freq);
+                }
+
+                if (freqFirst == null)
+                {
+                    freqFirst = freq;
+                }
+            }
+
+            Console.WriteLine(freqFirst);
+            Console.WriteLine(twice);
         }
 
         #endregion
@@ -24,7 +62,74 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "02");
 
-            Console.WriteLine("");
+            int count2 = 0;
+            int count3 = 0;
+
+            string shared = "";
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+                var chars = new Dictionary<char, int>();
+
+                foreach (var c in line)
+                {
+                    if (chars.ContainsKey(c))
+                    {
+                        chars[c]++;
+                    }
+                    else
+                    {
+                        chars.Add(c, 1);
+                    }
+                }
+
+                if (chars.Any(x => x.Value == 2))
+                {
+                    count2++;
+                }
+
+                if (chars.Any(x => x.Value == 3))
+                {
+                    count3++;
+                }
+
+                if (i < input.Count-1)
+                {
+                    for (int j = i + 1; j < input.Count; j++)
+                    {
+                        string other = input[j];
+                        int errors = 0;
+                        string tmp = "";
+
+                        for (int ci = 0; ci < line.Length; ci++)
+                        {
+                            if (line[ci] == other[ci])
+                            {
+                                tmp += line[ci];
+                            }
+                            else
+                            {
+                                errors++;
+                                if (errors > 1)
+                                {
+                                    ci = line.Length;
+                                }
+                            }
+                        }
+
+                        if (errors == 1)
+                        {
+                            shared = tmp;
+                        }
+                    }
+                }
+            }
+
+            int check = count2 * count3;
+
+            Console.WriteLine(check);
+            Console.WriteLine(shared);
         }
 
         #endregion
@@ -69,13 +174,13 @@ namespace AdventCode.Logic
             }
 
             int overlapCount = 0;
-            var InsideCountByCords = new Dictionary<CoordI, int>();
+            var InsideCountByCords = new Dictionary<CoordI, List<int>>();
 
             for (int y = 0; y <= yMax; y++)
             {
                 for (int x = 0; x <= xMax; x++)
                 {
-                    InsideCountByCords.Add(new CoordI(x, y), 0);
+                    InsideCountByCords.Add(new CoordI(x, y), new List<int>());
                 }
             }
 
@@ -87,10 +192,15 @@ namespace AdventCode.Logic
                 {
                     while (it.x <= claim.BotR.x)
                     {
-                        InsideCountByCords[it]++;
+                        InsideCountByCords[it].Add(claim.id);
 
-                        if (InsideCountByCords[it] == 2)
+                        if (InsideCountByCords[it].Count > 1)
                         {
+                            claim.FoundOverlap = true;
+                        }
+                        if (InsideCountByCords[it].Count == 2)
+                        {
+                            claims[InsideCountByCords[it][0]].FoundOverlap = true;
                             overlapCount++;
                         }
 
@@ -99,24 +209,6 @@ namespace AdventCode.Logic
 
                     it.x = claim.TopL.x;
                     it.y++;
-                }
-
-
-                foreach (var other in claims.Values)
-                {
-                    if (claim.id != other.id)
-                    {
-                        if (
-                            Common.AreaOverlap(
-                                claim.TopL, claim.BotR,
-                                other.TopL, other.BotR
-                            )
-                        )
-                        {
-                            claim.FoundOverlap = true;
-                            other.FoundOverlap = true;
-                        }
-                    }
                 }
             }
 
@@ -302,7 +394,6 @@ namespace AdventCode.Logic
                     }
                 }
 
-                // Out of bounds?
                 if (
                     x < 0
                     || y < 0
@@ -516,8 +607,121 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "09");
 
-            Console.WriteLine("");
+            int iLast = input[0].IndexOf("worth") + 6;
+            int playerCount = int.Parse(input[0].Substring(0, input[0].IndexOf(" play")));
+            int lastScore = int.Parse(input[0].Substring(iLast, input[0].IndexOf(" points") - iLast)); ;
+
+            long maxScoreLow = 0;
+
+            List<long> playerScores = new List<long>();
+            playerScores.AddRange(Enumerable.Repeat(0L, playerCount));
+
+            LinkedList<int> placedMarbles = new LinkedList<int>();
+            var currentNode = placedMarbles.AddFirst(0);
+            currentNode = placedMarbles.AddAfter(currentNode, 1);
+            currentNode = placedMarbles.AddBefore(currentNode, 2);
+            var removeNode = currentNode;
+
+            int marble = placedMarbles.Count;
+            while (marble <= lastScore * 100)
+            {
+                if (marble % 23 == 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        currentNode = currentNode.Previous;
+                        if (currentNode == null)
+                        {
+                            currentNode = placedMarbles.Last;
+                        }
+                    }
+
+                    removeNode = currentNode;
+
+                    currentNode = currentNode.Next;
+                    if (currentNode == null)
+                    {
+                        currentNode = placedMarbles.Last;
+                    }
+
+                    playerScores[marble % playerCount] += marble + removeNode.Value;
+                    placedMarbles.Remove(removeNode);
+                }
+                else
+                {
+                    for (int i = 0; i < 1; i++)
+                    {
+                        currentNode = currentNode.Next;
+                        if (currentNode == null)
+                        {
+                            currentNode = placedMarbles.First;
+                        }
+                    }
+
+                    currentNode = placedMarbles.AddAfter(currentNode, marble);
+                }
+
+                if (marble == lastScore)
+                {
+                    maxScoreLow = playerScores.Aggregate((a, b) => Math.Max(a, b));
+                }
+
+                marble++;
+            }
+
+            long maxScore = playerScores.Aggregate((a, b) => Math.Max(a, b));
+
+            Console.WriteLine(maxScoreLow);
+            Console.WriteLine(maxScore);
         }
+
+        //public static void Go_09()
+        //{
+        //    var input = InputParser.GetLines("18", "09");
+
+        //    int playerCount = 471;
+        //    int lastScore = 72026;
+
+        //    long maxScoreLow = 0;
+
+        //    List<long> playerScores = new List<long>();
+        //    playerScores.AddRange(Enumerable.Repeat(0L, playerCount));
+
+        //    List<int> placedMarbles = new List<int> { 0, 2, 1 };
+        //    int currentIndex = 1;
+
+        //    int score = 0;
+        //    int marble = placedMarbles.Count;
+        //    while(marble <= lastScore * 2)
+        //    {
+        //        if (marble % 23 == 0)
+        //        {
+        //            currentIndex = (placedMarbles.Count + currentIndex - 7) % placedMarbles.Count;
+
+        //            score = marble + placedMarbles[currentIndex];
+        //            playerScores[marble % playerCount] += score;
+
+        //            placedMarbles.RemoveAt(currentIndex);
+        //        }
+        //        else
+        //        {
+        //            currentIndex = (currentIndex + 2) % placedMarbles.Count;
+        //            placedMarbles.Insert(currentIndex, marble);
+        //        }
+
+        //        if (marble == lastScore)
+        //        {
+        //            maxScoreLow = playerScores.Aggregate((a, b) => Math.Max(a, b));
+        //        }
+
+        //        marble++;
+        //    }
+
+        //    long maxScore = playerScores.Aggregate((a, b) => Math.Max(a, b));
+
+        //    Console.WriteLine(maxScoreLow);
+        //    Console.WriteLine(maxScore);
+        //}
 
         #endregion
 
@@ -526,6 +730,11 @@ namespace AdventCode.Logic
         public static void Go_10()
         {
             var input = InputParser.GetLines("18", "10");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -538,6 +747,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "11");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -548,6 +762,11 @@ namespace AdventCode.Logic
         public static void Go_12()
         {
             var input = InputParser.GetLines("18", "12");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -560,6 +779,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "13");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -570,6 +794,11 @@ namespace AdventCode.Logic
         public static void Go_14()
         {
             var input = InputParser.GetLines("18", "14");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -582,6 +811,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "15");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -592,6 +826,11 @@ namespace AdventCode.Logic
         public static void Go_16()
         {
             var input = InputParser.GetLines("18", "16");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -604,6 +843,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "17");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -614,6 +858,11 @@ namespace AdventCode.Logic
         public static void Go_18()
         {
             var input = InputParser.GetLines("18", "18");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -626,6 +875,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "19");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -636,6 +890,11 @@ namespace AdventCode.Logic
         public static void Go_20()
         {
             var input = InputParser.GetLines("18", "20");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -648,6 +907,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "21");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -658,6 +922,11 @@ namespace AdventCode.Logic
         public static void Go_22()
         {
             var input = InputParser.GetLines("18", "22");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
@@ -670,6 +939,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "23");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -681,6 +955,11 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "24");
 
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
+
             Console.WriteLine("");
         }
 
@@ -691,6 +970,11 @@ namespace AdventCode.Logic
         public static void Go_25()
         {
             var input = InputParser.GetLines("18", "25");
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                string line = input[i];
+            }
 
             Console.WriteLine("");
         }
