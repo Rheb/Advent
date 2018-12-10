@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -675,54 +676,6 @@ namespace AdventCode.Logic
             Console.WriteLine(maxScore);
         }
 
-        //public static void Go_09()
-        //{
-        //    var input = InputParser.GetLines("18", "09");
-
-        //    int playerCount = 471;
-        //    int lastScore = 72026;
-
-        //    long maxScoreLow = 0;
-
-        //    List<long> playerScores = new List<long>();
-        //    playerScores.AddRange(Enumerable.Repeat(0L, playerCount));
-
-        //    List<int> placedMarbles = new List<int> { 0, 2, 1 };
-        //    int currentIndex = 1;
-
-        //    int score = 0;
-        //    int marble = placedMarbles.Count;
-        //    while(marble <= lastScore * 2)
-        //    {
-        //        if (marble % 23 == 0)
-        //        {
-        //            currentIndex = (placedMarbles.Count + currentIndex - 7) % placedMarbles.Count;
-
-        //            score = marble + placedMarbles[currentIndex];
-        //            playerScores[marble % playerCount] += score;
-
-        //            placedMarbles.RemoveAt(currentIndex);
-        //        }
-        //        else
-        //        {
-        //            currentIndex = (currentIndex + 2) % placedMarbles.Count;
-        //            placedMarbles.Insert(currentIndex, marble);
-        //        }
-
-        //        if (marble == lastScore)
-        //        {
-        //            maxScoreLow = playerScores.Aggregate((a, b) => Math.Max(a, b));
-        //        }
-
-        //        marble++;
-        //    }
-
-        //    long maxScore = playerScores.Aggregate((a, b) => Math.Max(a, b));
-
-        //    Console.WriteLine(maxScoreLow);
-        //    Console.WriteLine(maxScore);
-        //}
-
         #endregion
 
         #region Go_10
@@ -731,12 +684,96 @@ namespace AdventCode.Logic
         {
             var input = InputParser.GetLines("18", "10");
 
+            List<MovingPoint> points = new List<MovingPoint>();
+            int touchCount = 0;
+
             for (int i = 0; i < input.Count; i++)
             {
                 string line = input[i];
+
+                var split = line.Split("=<");
+
+                var sP = split[1].Split(">")[0].Split(", ");
+                var sV = split[2].Split(">")[0].Split(", ");
+
+                points.Add(new MovingPoint(
+                    new CoordI(int.Parse(sP[0]), int.Parse(sP[1])),
+                    new CoordI(int.Parse(sV[0]), int.Parse(sV[1]))
+                ));
             }
 
-            Console.WriteLine("");
+            int iteration = Math.Abs(points[0].Pos.x / points[0].Vel.x) - 150;
+
+            foreach (var point in points)
+            {
+                point.Pos.x += point.Vel.x * iteration;
+                point.Pos.y += point.Vel.y * iteration;
+            }
+
+            while (touchCount < points.Count - 10)
+            {
+                iteration++;
+
+                foreach (var point in points)
+                {
+                    point.Pos.Add(point.Vel);
+                    point.FoundTouhing = false;
+                }
+
+                for (int i = 0; i < points.Count - 1; i++)
+                {
+                    for (int j = i + 1; j < points.Count; j++)
+                    {
+                        if (points[i].Pos.IsTouching(points[j].Pos))
+                        {
+                            points[i].FoundTouhing = true;
+                            points[j].FoundTouhing = true;
+                        }
+                    }
+                }
+
+                touchCount = points.Aggregate(0, (c, pt) => c + (pt.FoundTouhing ? 1 : 0));
+            }
+
+            points = points.OrderBy(pt => pt.Pos.y).ThenBy(pt => pt.Pos.x).ToList();
+
+            int yFrom = points.Aggregate((a, b) => a.Pos.y < b.Pos.y ? a : b).Pos.y;
+            int yTo = points.Aggregate((a, b) => a.Pos.y > b.Pos.y ? a : b).Pos.y;
+
+            int xFrom = points.Aggregate((a, b) => a.Pos.x < b.Pos.x ? a : b).Pos.x;
+            int xTo = points.Aggregate((a, b) => a.Pos.x > b.Pos.x ? a : b).Pos.x;
+
+            for (int y = yFrom; y <= yTo; y++)
+            {
+                for (int x = xFrom; x <= xTo; x++)
+                {
+                    bool match = false;
+                    while (
+                        points.Count > 0
+                        && points[0].Pos.x == x
+                        && points[0].Pos.y == y)
+                    {
+                        points.RemoveAt(0);
+
+                        match = true;
+                    }
+
+                    if (match)
+                    {
+                        Console.Write('#');
+                    }
+                    else
+                    {
+                        Console.Write('.');
+                    }
+
+                }
+
+                Console.Write('\n');
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(iteration);
         }
 
         #endregion

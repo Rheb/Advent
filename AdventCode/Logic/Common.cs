@@ -34,6 +34,27 @@ namespace AdventCode.Logic
             y = p_iY;
         }
 
+        public void Add(CoordI other)
+        {
+            x += other.x;
+            y += other.y;
+        }
+
+        public bool IsTouching(CoordI other)
+        {
+            if (x == other.x)
+            {
+                return y - 1 <= other.y && other.y <= y + 1;
+            }
+
+            if (y == other.y)
+            {
+                return x - 1 <= other.x && other.x <= x + 1;
+            }
+
+            return false;
+        }
+
         public static bool operator ==(CoordI a, CoordI b)
         {
             if (a is null)

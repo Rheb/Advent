@@ -4,6 +4,24 @@ using System.Text;
 
 namespace AdventCode.Logic
 {
+    #region MovingPoint
+
+    public class MovingPoint
+    {
+        public bool FoundTouhing { get; set; } = false;
+
+        public CoordI Pos { get; set; }
+        public CoordI Vel { get; set; }
+
+        public MovingPoint(CoordI p_cPos, CoordI p_cVel)
+        {
+            Pos = p_cPos;
+            Vel = p_cVel;
+        }
+    }
+
+    #endregion
+
     #region FabricClaim
 
     public class FabricClaim
