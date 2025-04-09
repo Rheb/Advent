@@ -7,9 +7,7 @@ namespace AdventCode
     {
         static void Main(string[] args)
         {
-            Advent2018.Go_10();
-
-            Console.WriteLine("\nHej från 2025");
+            Advent2024.Go_01();
 
             Console.WriteLine("\n\nPress any key to exit...");
             Console.ReadKey();
