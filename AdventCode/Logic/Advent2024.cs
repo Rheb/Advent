@@ -58,5 +58,91 @@ namespace AdventCode.Logic
         }
 
         #endregion
+
+        #region Go_02
+
+        public static void Go_02()
+        {
+            // TODO: Make is safe check func
+            // Run with first item removed
+            // Run with seccond item removed
+
+            int minDiff = 1;
+            int maxDiff = 3;
+
+            var input = InputParser.GetLines("24", "02");
+
+            List<List<int>> lines = 
+                input
+                .Select(l => 
+                    l.Split(' ').Select(str => int.Parse(str))
+                    .ToList()
+                ).ToList();
+
+            int safeCount = 0;
+            int safeWithSingleIgnoreCount = 0;
+
+            foreach (var line in lines)
+            {
+                bool shouldAscend = true;
+                if (line[0] > line[1])
+                {
+                    shouldAscend = false;
+                }
+
+                int diff = 0;
+                int absDiff = 0;
+                bool isSafe = true;
+                bool isSafeWithSingleIgnore = true;
+                int ignorePreviousCount = 0;
+
+                for (int i = 1; i < line.Count; i++)
+                {
+                    if (ignorePreviousCount == 0)
+                    {
+                        diff = line[i] - line[i - 1];
+                    }
+                    else if (ignorePreviousCount == 1)
+                    {
+                        diff = line[i] - line[i - 2];
+                    }
+
+                    absDiff = Math.Abs(diff);
+
+                    // Check if not safe
+                    if (
+                        (shouldAscend && diff < 0)
+                        || (!shouldAscend && diff > 0)
+                        || (absDiff < 1)
+                        || (absDiff > 3)
+                    )
+                    {
+                        isSafe = false;
+                        ignorePreviousCount++;
+
+                        if (ignorePreviousCount > 1)
+                        {
+                            isSafeWithSingleIgnore = false;
+                            i = line.Count;
+                        }
+                    }
+                }
+
+                if (isSafe)
+                {
+                    safeCount++;
+                }
+
+                if (isSafeWithSingleIgnore)
+                {
+                    safeWithSingleIgnoreCount++;
+                }
+            }
+
+            Console.WriteLine(safeCount);
+            Console.WriteLine(safeWithSingleIgnoreCount);
+        }
+
+        #endregion
     }
 }
